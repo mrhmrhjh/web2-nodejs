@@ -25,32 +25,38 @@ var app = http.createServer(function(request,response){
 
     if (pathname === '/') {
       fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, desc) => {
-  //      if (err) throw err;
+        if (queryData.id === undefined) {
+          desc = 'Hello Node.js';
+          title = 'Welcom';
+        }
+        // if (err) {
+        //   desc = 'Hello Node.js';
+        //   title = 'Welcom';
+        // }
 
         var template = `
-        <!doctype html>
-        <html>
-        <head>
-          <title>WEB1 - ${title}</title>
-          <meta charset="utf-8">
-        </head>
-        <body>
-          <h1><a href="/">WEB</a></h1>
-          <ul>
-            <li><a href="/?id=HTML">HTML</a></li>
-            <li><a href="/?id=CSS">CSS</a></li>
-            <li><a href="/?id=JavaScript">JavaScript</a></li>
-          </ul>
-          <h2>${title}</h2>
-          <p>${desc}</p>
-        </body>
-        </html>
+          <!doctype html>
+          <html>
+          <head>
+            <title>WEB1 - ${title}</title>
+            <meta charset="utf-8">
+          </head>
+          <body>
+            <h1><a href="/">WEB</a></h1>
+            <ul>
+              <li><a href="/?id=HTML">HTML</a></li>
+              <li><a href="/?id=CSS">CSS</a></li>
+              <li><a href="/?id=JavaScript">JavaScript</a></li>
+            </ul>
+            <h2>${title}</h2>
+            <p>${desc}</p>
+          </body>
+          </html>
         `;
-
         response.writeHead(200);
         response.end(template);
-
       });
+
 
     } else {
       response.writeHead(200);
