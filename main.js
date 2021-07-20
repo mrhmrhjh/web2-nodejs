@@ -180,6 +180,27 @@ console.log('pathname='+pathname);
           response.end(template);
         });
       });
+    } else if (pathname === '/update_process') {
+      var body = '';
+      // data를 받으면 자동 callback이 실행됨
+      request.on('data', function(chuckdata) {
+        body += chuckdata;
+      });
+      // data를 모두 받으면 'end' 로 정의된 callback이 호출됨.
+      request.on('end', function(){
+        var post = qs.parse(body);
+        console.log(post);
+        var id = post.id;
+        var title = post.title;
+        var description = post.description;
+
+        fs.rename(`data/${id}`, `data/${title}`, function(error){
+          fs.writeFile(`data/${title}`, description, 'utf8', function(error){
+            response.writeHead(302, {Location: `/?id=${title}`}); // 301 - 페이지 변경됨.   302- 일시적으로 페이지 변경됨.
+            response.end();
+          });
+        });
+      });
 
     } else {
       response.writeHead(404);
