@@ -3,36 +3,35 @@ var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
 
+var template = {
+  HTML : function (title, list, body, control) {
+    return `
+      <!doctype html>
+      <html>
+      <head>
+        <title>WEB1 - ${title}</title>
+        <meta charset="utf-8">
+      </head>
+      <body>
+        <h1><a href="/">WEB2</a></h1>
+        ${list}
+        ${control}
+        ${body}
+      </body>
+      </html>
+    `;
+  },
+  list : function (fileList) {
+    var list = '<ul>';
+    var i = 0;
+    while ( i < fileList.length) {
+      list = list + `<li><a href="/?id=${fileList[i]}">${fileList[i]}</a></li>`;
+      i = i+1;
+    }
+    list = list + '</ul>';
 
-function templateHTML(title, list, body, control) {
-  return `
-    <!doctype html>
-    <html>
-    <head>
-      <title>WEB1 - ${title}</title>
-      <meta charset="utf-8">
-    </head>
-    <body>
-      <h1><a href="/">WEB2</a></h1>
-      ${list}
-      ${control}
-      ${body}
-    </body>
-    </html>
-  `;
-
-}
-
-function templateList(fileList) {
-  var list = '<ul>';
-  var i = 0;
-  while ( i < fileList.length) {
-    list = list + `<li><a href="/?id=${fileList[i]}">${fileList[i]}</a></li>`;
-    i = i+1;
+    return list;
   }
-  list = list + '</ul>';
-
-  return list;
 }
 
 
@@ -57,7 +56,7 @@ var app = http.createServer(function(request,response){
     //   response.end();
     // }
 
-console.log('pathname='+pathname);
+    console.log('pathname='+pathname);
 
     if (pathname === '/') {
       fs.readdir('./data', function(error, fileList) {
@@ -71,19 +70,21 @@ console.log('pathname='+pathname);
         }
 
         fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, desc) => {
-          var list = templateList(fileList);
+          // var list = templateList(fileList);
+          var list = template.list(fileList);
 
           //파일이 없는 경우
           if (err) {
             desc = 'Hello Node.js';
             title = 'Welcom';
-            var template = templateHTML(title, list,
+            // var template = templateHTML(title, list,
+            var html = template.HTML(title, list,
               `<h2>${title}</h2><p>${desc}</p>`,
               `<a href="/create">create</a>`
             );
           } else {
             // 파일을 선택한 경우
-            var template = templateHTML(title, list,
+            var html = template.HTML(title, list,
               `<h2>${title}</h2><p>${desc}</p>`,
               `<a href="/create">create</a>
                <a href="/update?id=${title}">update</a>
@@ -96,7 +97,7 @@ console.log('pathname='+pathname);
           }
 
           response.writeHead(200);
-          response.end(template);
+          response.end(html);
         });
       });
 
@@ -105,8 +106,8 @@ console.log('pathname='+pathname);
         console.log(`fileList=${fileList}`);
 
         title = 'Web - create';
-        var list = templateList(fileList);
-        var template = templateHTML(title, list, `
+        var list = template.list(fileList);
+        var html = template.HTML(title, list, `
           <h2>${title}</h2>
           <form action="/create_process" method="post">
             <p>
@@ -121,7 +122,7 @@ console.log('pathname='+pathname);
           </form>
           `, '');
         response.writeHead(200);
-        response.end(template);
+        response.end(html);
       });
     } else if (pathname === '/create_process') {
       var body = '';
@@ -150,19 +151,19 @@ console.log('pathname='+pathname);
         console.log(`update-fileList=${fileList}`);
 
         fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, description) => {
-          var list = templateList(fileList);
+          var list = template.list(fileList);
 
           //파일이 없는 경우
           if (err) {
             desc = 'Hello Node.js';
             title = 'Welcom';
-            var template = templateHTML(title, list,
+            var html = template.HTML(title, list,
               `<h2>${title}</h2><p>${description}</p>`,
               `<a href="/create">create</a>`
             );
           } else {
             // 파일을 선택한 경우
-            var template = templateHTML(title, list,
+            var html = template.HTML(title, list,
               `
               <h2>${title}</h2>
               <form action="/update_process" method="post">
@@ -183,7 +184,7 @@ console.log('pathname='+pathname);
           }
 
           response.writeHead(200);
-          response.end(template);
+          response.end(html);
         });
       });
     } else if (pathname === '/update_process') {
