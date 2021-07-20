@@ -4,7 +4,7 @@ var url = require('url');
 var qs = require('querystring');
 
 
-function templateHTML(title, list, body) {
+function templateHTML(title, list, body, control) {
   return `
     <!doctype html>
     <html>
@@ -15,8 +15,7 @@ function templateHTML(title, list, body) {
     <body>
       <h1><a href="/">WEB2</a></h1>
       ${list}
-
-      <a href="/create">create</a>
+      ${control}
       ${body}
     </body>
     </html>
@@ -64,14 +63,32 @@ console.log('pathname='+pathname);
       fs.readdir('./data', function(error, fileList) {
         console.log(`fileList=${fileList}`);
 
+        // 홈인 경우
+        if (queryData.id === undefined) {
+        }
+        // list 섡택된 경우
+        else {
+        }
+
         fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, desc) => {
+          var list = templateList(fileList);
+
+          //파일이 없는 경우
           if (err) {
             desc = 'Hello Node.js';
             title = 'Welcom';
+            var template = templateHTML(title, list,
+              `<h2>${title}</h2><p>${desc}</p>`,
+              `<a href="/create">create</a>`
+            );
+          } else {
+            // 파일을 선택한 경우
+            var template = templateHTML(title, list,
+              `<h2>${title}</h2><p>${desc}</p>`,
+              `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
+            );
           }
-          var list = templateList(fileList);
 
-          var template = templateHTML(title, list, `<h2>${title}</h2><p>${desc}</p>`);
           response.writeHead(200);
           response.end(template);
         });
@@ -85,7 +102,7 @@ console.log('pathname='+pathname);
         var list = templateList(fileList);
         var template = templateHTML(title, list, `
           <h2>${title}</h2>
-          <form action="http://localhost:3000/create_process" method="post">
+          <form action="/create_process" method="post">
             <p>
               <input type="text" name="title" placeholder="title">
             </p>
@@ -96,8 +113,7 @@ console.log('pathname='+pathname);
               <input type="submit">
             </p>
           </form>
-
-          `);
+          `, '');
         response.writeHead(200);
         response.end(template);
       });
@@ -121,6 +137,47 @@ console.log('pathname='+pathname);
           // response.end('Success-write');
           response.writeHead(302, {Location: `/?id=${title}`}); // 301 - 페이지 변경됨.   302- 일시적으로 페이지 변경됨.
           response.end();
+        });
+      });
+    } else if (pathname === '/update') {
+      fs.readdir('./data', function(error, fileList) {
+        console.log(`update-fileList=${fileList}`);
+
+        fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, description) => {
+          var list = templateList(fileList);
+
+          //파일이 없는 경우
+          if (err) {
+            desc = 'Hello Node.js';
+            title = 'Welcom';
+            var template = templateHTML(title, list,
+              `<h2>${title}</h2><p>${description}</p>`,
+              `<a href="/create">create</a>`
+            );
+          } else {
+            // 파일을 선택한 경우
+            var template = templateHTML(title, list,
+              `
+              <h2>${title}</h2>
+              <form action="/update_process" method="post">
+                <input type="hidden" name="id" value=${title}>
+                <p>
+                  <input type="text" name="title" placeholder="title" value=${title}>
+                </p>
+                <p>
+                  <textarea name="description" placeholder="description"  rows="8" cols="80">${description}</textarea>
+                </p>
+                <p>
+                  <input type="submit">
+                </p>
+              </form>
+              `,
+              `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
+            );
+          }
+
+          response.writeHead(200);
+          response.end(template);
         });
       });
 
