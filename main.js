@@ -113,16 +113,19 @@ console.log('pathname='+pathname);
         // console.log(post);
         var title = post.title;
         var description = post.description;
-        console.log('title='+title);
-        console.log('description='+description);
+        // console.log('title='+title);
+        // console.log('description='+description);
+        fs.writeFile(`data/${title}`, description, 'utf8', function(error){
+
+          // response.writeHead(200); //200 - 성공
+          // response.end('Success-write');
+          response.writeHead(302, {Location: `/?id=${title}`}); // 301 - 페이지 변경됨.   302- 일시적으로 페이지 변경됨.
+          response.end();
+        });
       });
 
-
-      response.writeHead(200);
-      response.end('Succ');
-
     } else {
-      response.writeHead(200);
+      response.writeHead(404);
       response.end('Not Found');
     }
 
