@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var qs = require('querystring');
 
 
 function templateHTML(title, list, body) {
@@ -84,7 +85,7 @@ console.log('pathname='+pathname);
         var list = templateList(fileList);
         var template = templateHTML(title, list, `
           <h2>${title}</h2>
-          <form action="http://localhost:3000/process_create" method="post">
+          <form action="http://localhost:3000/create_process" method="post">
             <p>
               <input type="text" name="title" placeholder="title">
             </p>
@@ -100,6 +101,25 @@ console.log('pathname='+pathname);
         response.writeHead(200);
         response.end(template);
       });
+    } else if (pathname === '/create_process') {
+      var body = '';
+      // data를 받으면 자동 callback이 실행됨
+      request.on('data', function(chuck) {
+        body += chuck;
+      });
+      // data를 모두 받으면 'end' 로 정의된 callback이 호출됨.
+      request.on('end', function(){
+        var post = qs.parse(body);
+        // console.log(post);
+        var title = post.title;
+        var description = post.description;
+        console.log('title='+title);
+        console.log('description='+description);
+      });
+
+
+      response.writeHead(200);
+      response.end('Succ');
 
     } else {
       response.writeHead(200);
