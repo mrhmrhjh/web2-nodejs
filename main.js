@@ -85,7 +85,13 @@ console.log('pathname='+pathname);
             // 파일을 선택한 경우
             var template = templateHTML(title, list,
               `<h2>${title}</h2><p>${desc}</p>`,
-              `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
+              `<a href="/create">create</a>
+               <a href="/update?id=${title}">update</a>
+               <form action="delete_process" method="post">
+                 <input type="hidden" name="id" value="${title}">
+                 <input type="submit" value="delete">
+               </form>
+               `
             );
           }
 
@@ -199,6 +205,24 @@ console.log('pathname='+pathname);
             response.writeHead(302, {Location: `/?id=${title}`}); // 301 - 페이지 변경됨.   302- 일시적으로 페이지 변경됨.
             response.end();
           });
+        });
+      });
+    } else if (pathname === '/delete_process') {
+      var body = '';
+      // data를 받으면 자동 callback이 실행됨
+      request.on('data', function(chuckdata) {
+        body += chuckdata;
+      });
+      // data를 모두 받으면 'end' 로 정의된 callback이 호출됨.
+      request.on('end', function(){
+        var post = qs.parse(body);
+        console.log(post);
+        var id = post.id;
+        fs.unlink(`data/${id}`, function(err) {
+          // 301 - 페이지 변경됨.   302- 일시적으로 페이지 변경됨.
+          // /(홈) 으로 이동하도록 함.
+          response.writeHead(302, {Location: `/`});
+          response.end();
         });
       });
 
