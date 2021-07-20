@@ -12,8 +12,10 @@ function templateHTML(title, list, body) {
       <meta charset="utf-8">
     </head>
     <body>
-      <h1><a href="/">WEB</a></h1>
+      <h1><a href="/">WEB2</a></h1>
       ${list}
+
+      <a href="/create">create</a>
       ${body}
     </body>
     </html>
@@ -40,7 +42,7 @@ var app = http.createServer(function(request,response){
 
     var queryData = url.parse(_url, true).query;
     var pathname = url.parse(_url, true).pathname;
-    console.log(url.parse(_url, true));
+    // console.log(url.parse(_url, true));
 
     var title = queryData.id;
     // console.log(title);
@@ -55,89 +57,53 @@ var app = http.createServer(function(request,response){
     //   response.end();
     // }
 
+console.log('pathname='+pathname);
+
     if (pathname === '/') {
       fs.readdir('./data', function(error, fileList) {
-        console.log(fileList);
+        console.log(`fileList=${fileList}`);
 
         fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, desc) => {
-          // if (queryData.id === undefined) {
-          //   desc = 'Hello Node.js';
-          //   title = 'Welcom';
-          // }
           if (err) {
             desc = 'Hello Node.js';
             title = 'Welcom';
           }
-          // var list = '<ul>';
-          // var i = 0;
-          // while ( i < fileList.length) {
-          //   list = list + `<li><a href="/?id=${fileList[i]}">${fileList[i]}</a></li>`;
-          //   i = i+1;
-          // }
-          // list = list + '</ul>';
           var list = templateList(fileList);
 
           var template = templateHTML(title, list, `<h2>${title}</h2><p>${desc}</p>`);
-          // var template = templateHTML(title, list, `<h2>${title}</h2>${desc}`);
-          //  `
-          //   <!doctype html>
-          //   <html>
-          //   <head>
-          //     <title>WEB1 - ${title}</title>
-          //     <meta charset="utf-8">
-          //   </head>
-          //   <body>
-          //     <h1><a href="/">WEB</a></h1>
-          //     ${list}
-          //     <h2>${title}</h2>
-          //     <p>${desc}</p>
-          //   </body>
-          //   </html>
-          // `;
           response.writeHead(200);
           response.end(template);
         });
-
-        // if (queryData.id === undefined) {
-        //   desc = 'Hello Node.js';
-        //   title = 'Welcom';
-        //   var list = '<ul>';
-        //   var i = 0;
-        //   while ( i < fileList.length) {
-        //     list = list + `<li><a href="/?id=${fileList[i]}">${fileList[i]}</a></li>`;
-        //     i = i+1;
-        //   }
-        //   list = list + '</ul>';
-        //
-        //   var template = `
-        //     <!doctype html>
-        //     <html>
-        //     <head>
-        //       <title>WEB1 - ${title}</title>
-        //       <meta charset="utf-8">
-        //     </head>
-        //     <body>
-        //       <h1><a href="/">WEB</a></h1>
-        //       ${list}
-        //       <h2>${title}</h2>
-        //       <p>${desc}</p>
-        //     </body>
-        //     </html>
-        //   `;
-        //   response.writeHead(200);
-        //   response.end(template);
-        //
-        // } else {
-        //
-        // }
-
       });
 
+    } else if (pathname === '/create') {
+      fs.readdir('./data', function(error, fileList) {
+        console.log(`fileList=${fileList}`);
+
+        title = 'Web - create';
+        var list = templateList(fileList);
+        var template = templateHTML(title, list, `
+          <h2>${title}</h2>
+          <form action="http://localhost:3000/process_create" method="post">
+            <p>
+              <input type="text" name="title" placeholder="title">
+            </p>
+            <p>
+              <textarea name="description" placeholder="description"  rows="8" cols="80"></textarea>
+            </p>
+            <p>
+              <input type="submit">
+            </p>
+          </form>
+
+          `);
+        response.writeHead(200);
+        response.end(template);
+      });
 
     } else {
       response.writeHead(200);
       response.end('Not Found');
-
     }
 
 
