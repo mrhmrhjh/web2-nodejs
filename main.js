@@ -3,6 +3,7 @@ var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
 var template = require('./lib/template.js');
+var path = require('path');
 
 // var template = {
 //   HTML : function (title, list, body, control) {
@@ -63,14 +64,19 @@ var app = http.createServer(function(request,response){
       fs.readdir('./data', function(error, fileList) {
         console.log(`fileList=${fileList}`);
 
+        var filterId;
         // 홈인 경우
         if (queryData.id === undefined) {
         }
         // list 섡택된 경우
         else {
+          filterId = path.parse(queryData.id).base;
+          console.log('path.parse(queryData.id)=',path.parse(queryData.id));
+          console.log('filterId=',filterId);
+          console.log('queryData.id=',queryData.id);
         }
 
-        fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, desc) => {
+        fs.readFile(`data/${filterId}`, 'utf8' ,(err, desc) => {
           // var list = templateList(fileList);
           var list = template.list(fileList);
 
@@ -151,7 +157,11 @@ var app = http.createServer(function(request,response){
       fs.readdir('./data', function(error, fileList) {
         console.log(`update-fileList=${fileList}`);
 
-        fs.readFile(`data/${queryData.id}`, 'utf8' ,(err, description) => {
+        var filterId = path.parse(queryData.id).base;
+        console.log('path.parse(queryData.id)=',path.parse(queryData.id));
+        console.log('filterId=',filterId);
+        console.log('queryData.id=',queryData.id);
+        fs.readFile(`data/${filterId}`, 'utf8' ,(err, description) => {
           var list = template.list(fileList);
 
           //파일이 없는 경우
@@ -220,7 +230,8 @@ var app = http.createServer(function(request,response){
         var post = qs.parse(body);
         console.log(post);
         var id = post.id;
-        fs.unlink(`data/${id}`, function(err) {
+        var filterId = path.parse(id).base
+        fs.unlink(`data/${filterId}`, function(err) {
           // 301 - 페이지 변경됨.   302- 일시적으로 페이지 변경됨.
           // /(홈) 으로 이동하도록 함.
           response.writeHead(302, {Location: `/`});
